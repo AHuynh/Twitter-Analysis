@@ -1,5 +1,6 @@
 import datetime as dt
 import matplotlib.pyplot as plt
+import math
 from matplotlib.ticker import StrMethodFormatter, NullFormatter
 import numpy as np
 import pandas as pd
@@ -42,6 +43,25 @@ ax.yaxis.set_minor_formatter(NullFormatter())
 plt.close()
 
 ########################################################################################
+# Favorites VS sentiment (raw)
+# -0.9|-0.7|-0.5|-0.3|-0.1|+0.1|+0.3|+0.5|+0.7|+0.9
+sentiment_buckets = [[] for _ in range(11)]
+# Also create some buckets and take the average of each bucket.
+for s in range(0, len(dataset['Sentiment'].values)):
+  sentiment = dataset['Sentiment'][s]
+  sentiment_buckets[math.floor((sentiment+1)*5)].append(y[s])
+sentiment_means = [np.mean(i) for i in sentiment_buckets]
+plt.title(dep_var + ' VS Sentiment')
+plt.yscale('log')
+plt.scatter(dataset['Sentiment'].values, y, s=0.5)
+plt.scatter([-1 + 0.2 * i for i in range(0, len(sentiment_means))], sentiment_means, color='red')
+ax = plt.gca()
+ax.yaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
+ax.yaxis.set_minor_formatter(NullFormatter())
+plt.show()
+plt.close()
+
+########################################################################################
 # Avg Faves VS day
 dow_buckets = dataset.groupby(dataset['Day of week'])
 dow_means = dow_buckets[dep_var].mean()
@@ -59,5 +79,5 @@ plt.close()
 #simple_x_vs_avg_faves('Is reply', dataset)
 #simple_x_vs_avg_faves('User mentions', dataset)
 #simple_x_vs_avg_faves('Hashtags', dataset)
-simple_x_vs_avg_faves('Pictures', dataset)
+#simple_x_vs_avg_faves('Pictures', dataset)
 #simple_x_vs_avg_faves('Videos', dataset)

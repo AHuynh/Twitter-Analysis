@@ -10,13 +10,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 
 dataset = pd.read_csv('dataset.csv')
-X = dataset.iloc[:, 1:-2].values
+X = dataset.iloc[:, 0:-2].values
 y = dataset.iloc[:, -2].values
 ########################################################################################
 ## Data preprocesssing. Encoding categorical data.
 
 #print(X[0:3])
-# [60 2023 9 13 21 2 0 False 1 0 0 0]
+# [0.0 60 2023 9 13 21 2 0 False 1 0 0 0]
 
 ## Time. Use One-Hot Encoding, as year/month/date are categorical. Though there is some relation
 # due to ordering, I want to avoid the issue of rollover times (eg. 31st -> 1st, Dec -> Jan) not
