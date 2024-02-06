@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -16,6 +17,7 @@ y = dataset.iloc[:, -2].values
 ## Data preprocesssing. Encoding categorical data.
 
 #print(X[0:3])
+# Sentiment,Tweet Length,Year,Month,Day,Hour,Day of week,Is reply,User mentions,Hashtags,Pictures,Videos,Favorites,Retweets
 # [0.0 60 2023 9 13 21 2 0 False 1 0 0 0]
 
 ## Time. Use One-Hot Encoding, as year/month/date are categorical. Though there is some relation
@@ -27,10 +29,9 @@ y = dataset.iloc[:, -2].values
 # Day: [0-31). End up with 30 columns.
 # Hour: [0-24). End up with 23 columns.
 # Day of week: [0-8). End up with 7 columns.
-ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(), [1, 2, 3, 4, 5])], remainder='passthrough', sparse_threshold=0)
+ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(), [2, 3, 4, 5, 6])], remainder='passthrough', sparse_threshold=0)
 X = np.array(ct.fit_transform(X))
-
-#print(X[0:3])
+#print(X[0])
 
 ########################################################################################
 ## Data set splitting. Split into training and testing sets.
@@ -43,9 +44,7 @@ X_train_sc = X_train
 X_test_sc = X_test
 X_train_sc[:, -6:] = sc.fit_transform(X_train_sc[:, -6:])
 X_test_sc[:, -6:] = sc.transform(X_test_sc[:, -6:])
-
-#print(X_train[0:3])
-#print('OK!')
+#print(X_train[0])
 
 ########################################################################################
 ## Multiple Linear Regression
@@ -75,16 +74,34 @@ print(' Score (Test):', mlr_lda_regressor.score(X_test_lda, y_test))
 #np.set_printoptions(precision=2)
 #print(np.concatenate((y_pred.reshape(len(y_pred),1), y_test.reshape(len(y_test),1)),1))
 
-
 ########################################################################################
 ## Decision Tree Regression
-tree_regressor = DecisionTreeRegressor(random_state = 0)
+tree_regressor = DecisionTreeRegressor(random_state=0)
 tree_regressor.fit(X_train, y_train)
 y_pred_tree = tree_regressor.predict(X_test)
 
-## MSE accuracy measurement(LDA)
+## MSE accuracy measurement(DT)
 print('MSE (DT):', mean_squared_error(y_test, y_pred_tree))
 print(' Score (Train):', tree_regressor.score(X_train, y_train))
 print(' Score (Test):', tree_regressor.score(X_test, y_test))
 
+########################################################################################
+## Random Forest Tree Regression
+forest_regressor = RandomForestRegressor(random_state=0)
+forest_regressor.fit(X_train, y_train)
+y_pred_forest = forest_regressor.predict(X_test)
 
+## MSE accuracy measurement(RF)
+print('MSE (RF):', mean_squared_error(y_test, y_pred_forest))
+print(' Score (Train):', forest_regressor.score(X_train, y_train))
+print(' Score (Test):', forest_regressor.score(X_test, y_test))
+
+
+########################################################################################
+## Remarks
+# These methods seem ... bad. But I'm not really surprised.
+# For regression, I doubt the data is entirely linear ... in fact it's barely proper at
+# all. It probably lacks linearity, homoscedasticity, multivariate normality. There's a
+# few big outliers. It's ... yeah, not great for linear regression.
+# The tree regressor seemed to fare a bit better, but I have a feeling it's still not
+# great. It's time to try an ANN next.

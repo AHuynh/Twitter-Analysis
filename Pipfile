@@ -11,6 +11,7 @@ scikit-learn = "*"
 dateparser = "*"
 matplotlib = "*"
 nltk = "*"
+pyarrow = "*"
 
 [dev-packages]
 
