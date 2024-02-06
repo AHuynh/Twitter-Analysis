@@ -12,8 +12,9 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
+#nltk.download()
+
 raw_tweets = open('tweets.js', 'r', encoding="cp866")
-# raw_tweets = open('tweets_test.js', 'r')
 json_tweets = json.load(raw_tweets)
 raw_tweets.close()
 
@@ -21,25 +22,26 @@ formatted_tweets = []
 
 analyzer = SentimentIntensityAnalyzer()
 
-for i in range(900, 976):
-#for i in range(0, len(json_tweets)):
+#for i in range(5900, 5976):
+n = len(json_tweets)
+for i in range(0, n):
+  if i % 100 == 0:
+    print('Processing ' + str(i) + ' of ' + str(n) + '.')
+
   tweet = json_tweets[i]['tweet']
   
-  tweet_text = word_tokenize(tweet['full_text'].lower())
-  print("==========================================================================")
-  print("Raw tweet: " + tweet['full_text'])
+  # Sentiment analysis on tweet: [-1, 1] from neg to pos.
+  tweet_text = word_tokenize(tweet['full_text'].lower()) #print("==========================================================================")
+  #print("Raw tweet: " + tweet['full_text'])
   filtered_tokens = [token for token in tweet_text if token not in stopwords.words('english')]
   lemmatizer = WordNetLemmatizer()
   lemmatized_tokens = [lemmatizer.lemmatize(token) for token in filtered_tokens]
   processed_text = ' '.join(lemmatized_tokens)  
-  print("Score:", analyzer.polarity_scores(processed_text))
-  
-  
-  
-  
+  tweet_sentiment = analyzer.polarity_scores(processed_text)['compound']
+  #print("Score:", tweet_sentiment)
   
   tweet_len = int(tweet['display_text_range'][1])
-  
+
   tweet_dt = dateparser.parse(tweet['created_at'], date_formats=['%a %b %d %H:%M:%S %z %Y'])
   tweet_year = tweet_dt.year
   tweet_month = tweet_dt.month
@@ -67,14 +69,10 @@ for i in range(900, 976):
   tweet_faves = int(tweet['favorite_count'])
   tweet_rts = int(tweet['retweet_count'])
     
-  formatted_tweets.append([tweet_text, tweet_len, tweet_year, tweet_month, tweet_day, tweet_hour, tweet_day_of_week, tweet_is_reply, tweet_user_mentions, tweet_hashtags, tweet_photos, tweet_videos, tweet_faves, tweet_rts])
-  # print(formatted_tweets[i])
-
-quit()
+  formatted_tweets.append([tweet_sentiment, tweet_len, tweet_year, tweet_month, tweet_day, tweet_hour, tweet_day_of_week, tweet_is_reply, tweet_user_mentions, tweet_hashtags, tweet_photos, tweet_videos, tweet_faves, tweet_rts])
+  #print(formatted_tweets[i])
 
 with open('dataset.csv', 'w', newline='') as f:
   wr = csv.writer(f)
-  wr.writerow(['Tweet Text', 'Tweet Length', 'Year', 'Month', 'Day', 'Hour', 'Day of week', 'Is reply', 'User mentions', 'Hashtags', 'Pictures', 'Videos', 'Favorites', 'Retweets'])
+  wr.writerow(['Sentiment', 'Tweet Length', 'Year', 'Month', 'Day', 'Hour', 'Day of week', 'Is reply', 'User mentions', 'Hashtags', 'Pictures', 'Videos', 'Favorites', 'Retweets'])
   wr.writerows(formatted_tweets)
-
-#input('\nProgram complete. ENTER to quit.')
